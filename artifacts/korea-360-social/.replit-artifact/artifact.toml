@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Korea 360 Social"
+description = "An Arabic-first immersive social web app for meeting people in South Korea through profiles, private conversations, community rooms, and opt-in random matching."
+version = "1.0.0"
+id = "artifacts/korea-360-social"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20740
+
+[services.development]
+run = "pnpm --filter @workspace/korea-360-social run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/korea-360-social", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/korea-360-social/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20740"
+BASE_PATH = "/"

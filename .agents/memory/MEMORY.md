@@ -1,0 +1,1 @@
+- [Korea 360 product scope](korea-360-product-brief.md) — connect users in South Korea via Google sign-in, profiles, private/group chats, and random matching in an interactive 360° experience.

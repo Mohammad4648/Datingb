@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Korea 360">
+  <rect width="128" height="128" rx="32" fill="#205c50"/>
+  <circle cx="64" cy="61" r="35" fill="none" stroke="#f6dbb5" stroke-width="5"/>
+  <path d="M29 61h70M64 26c12 10 18 22 18 35s-6 25-18 35M64 26c-12 10-18 22-18 35s6 25 18 35" fill="none" stroke="#f6dbb5" stroke-linecap="round" stroke-width="4"/>
+  <path d="M42 92h44" stroke="#d98061" stroke-linecap="round" stroke-width="7"/>
+</svg>

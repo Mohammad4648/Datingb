@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for Korea 360 Social
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: social
+    description: Profiles and discovery
+  - name: conversations
+    description: Private messages
+  - name: rooms
+    description: Group conversations
+  - name: matching
+    description: Opt-in random matching
+  - name: safety
+    description: User safety and privacy
 paths:
   /healthz:
     get:
@@ -24,6 +34,364 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard/summary:
+    get:
+      operationId: getSocialSummary
+      tags: [social]
+      summary: Get discovery dashboard counts
+      responses:
+        "200":
+          description: Social summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SocialSummary"
+  /profiles/me:
+    get:
+      operationId: getMyProfile
+      tags: [social]
+      summary: Get the signed-in user's profile
+      responses:
+        "200":
+          description: Profile, or null when onboarding has not been completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyProfileResponse"
+        "401":
+          description: Sign-in required
+    put:
+      operationId: saveMyProfile
+      tags: [social]
+      summary: Create or update the signed-in user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Saved profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+  /profiles:
+    get:
+      operationId: discoverProfiles
+      tags: [social]
+      summary: Find public profiles in South Korea
+      parameters:
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: interest
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Profile"
+  /profiles/{profileId}/conversations:
+    post:
+      operationId: startConversation
+      tags: [conversations]
+      summary: Start or resume a private conversation
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Private conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "401":
+          description: Sign-in required
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      summary: List the signed-in user's private conversations
+      responses:
+        "200":
+          description: Private conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+  /conversations/{conversationId}/messages:
+    get:
+      operationId: listConversationMessages
+      tags: [conversations]
+      summary: Read messages in a private conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendConversationMessage
+      tags: [conversations]
+      summary: Send a private message
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Sent message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+  /rooms:
+    get:
+      operationId: listRooms
+      tags: [rooms]
+      summary: List active community rooms
+      parameters:
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: topic
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Community rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Room"
+    post:
+      operationId: createRoom
+      tags: [rooms]
+      summary: Create a community room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomInput"
+      responses:
+        "201":
+          description: Created room
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+  /rooms/{roomId}/join:
+    post:
+      operationId: joinRoom
+      tags: [rooms]
+      summary: Join a community room
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Joined room
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+  /rooms/{roomId}/leave:
+    post:
+      operationId: leaveRoom
+      tags: [rooms]
+      summary: Leave a community room
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Left room
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+  /rooms/{roomId}/messages:
+    get:
+      operationId: listRoomMessages
+      tags: [rooms]
+      summary: Read messages in a community room
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Room messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendRoomMessage
+      tags: [rooms]
+      summary: Send a message to a community room
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Sent message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+  /matches/random:
+    post:
+      operationId: findRandomMatch
+      tags: [matching]
+      summary: Opt in to an interest-based random match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchInput"
+      responses:
+        "200":
+          description: Matched profile and private conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchResult"
+        "404":
+          description: No eligible profile found
+  /safety/blocks:
+    get:
+      operationId: listBlockedProfiles
+      tags: [safety]
+      summary: List blocked profiles
+      responses:
+        "200":
+          description: Blocked profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Profile"
+    post:
+      operationId: blockProfile
+      tags: [safety]
+      summary: Block a profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockInput"
+      responses:
+        "201":
+          description: Block created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SafetyActionResult"
+  /safety/blocks/{profileId}:
+    delete:
+      operationId: unblockProfile
+      tags: [safety]
+      summary: Unblock a profile
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Profile unblocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SafetyActionResult"
+  /safety/reports:
+    post:
+      operationId: reportProfile
+      tags: [safety]
+      summary: Report an unsafe profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "201":
+          description: Report received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SafetyActionResult"
 components:
   schemas:
     HealthStatus:
@@ -31,6 +399,211 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
-
+      required: [status]
+    SocialSummary:
+      type: object
+      properties:
+        onlineCount:
+          type: integer
+        memberCount:
+          type: integer
+        activeRoomCount:
+          type: integer
+        featuredProfiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Profile"
+      required: [onlineCount, memberCount, activeRoomCount, featuredProfiles]
+    MyProfileResponse:
+      type: object
+      properties:
+        profile:
+          anyOf:
+            - $ref: "#/components/schemas/Profile"
+            - type: "null"
+      required: [profile]
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+        displayName:
+          type: string
+        age:
+          type: integer
+        city:
+          type: string
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        languages:
+          type: array
+          items:
+            type: string
+        interests:
+          type: array
+          items:
+            type: string
+        isOnline:
+          type: boolean
+        isPublic:
+          type: boolean
+      required: [id, displayName, age, city, bio, avatarUrl, languages, interests, isOnline, isPublic]
+    ProfileInput:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 40
+        age:
+          type: integer
+          minimum: 18
+          maximum: 120
+        city:
+          type: string
+          minLength: 2
+          maxLength: 80
+        bio:
+          type: string
+          maxLength: 240
+        avatarUrl:
+          type: ["string", "null"]
+        languages:
+          type: array
+          items:
+            type: string
+          maxItems: 5
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 12
+        isPublic:
+          type: boolean
+      required: [displayName, age, city, bio, avatarUrl, languages, interests, isPublic]
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: ["integer", "null"]
+        roomId:
+          type: ["integer", "null"]
+        senderId:
+          type: integer
+        senderName:
+          type: string
+        senderAvatarUrl:
+          type: ["string", "null"]
+        text:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, conversationId, roomId, senderId, senderName, senderAvatarUrl, text, createdAt]
+    MessageInput:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required: [text]
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        partner:
+          $ref: "#/components/schemas/Profile"
+        lastMessage:
+          type: ["string", "null"]
+        updatedAt:
+          type: string
+          format: date-time
+        unreadCount:
+          type: integer
+      required: [id, partner, lastMessage, updatedAt, unreadCount]
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        city:
+          type: string
+        topic:
+          type: string
+        memberCount:
+          type: integer
+        isJoined:
+          type: boolean
+      required: [id, name, description, city, topic, memberCount, isJoined]
+    RoomInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 60
+        description:
+          type: string
+          maxLength: 300
+        city:
+          type: string
+          minLength: 2
+          maxLength: 80
+        topic:
+          type: string
+          minLength: 2
+          maxLength: 40
+      required: [name, description, city, topic]
+    MatchInput:
+      type: object
+      properties:
+        city:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 12
+      required: [city, interests]
+    MatchResult:
+      type: object
+      properties:
+        profile:
+          $ref: "#/components/schemas/Profile"
+        conversation:
+          $ref: "#/components/schemas/Conversation"
+      required: [profile, conversation]
+    BlockInput:
+      type: object
+      properties:
+        profileId:
+          type: integer
+      required: [profileId]
+    ReportInput:
+      type: object
+      properties:
+        profileId:
+          type: integer
+        reason:
+          type: string
+          enum: [harassment, spam, inappropriate, underage, other]
+        details:
+          type: string
+          maxLength: 1000
+      required: [profileId, reason, details]
+    SafetyActionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
