@@ -209,6 +209,7 @@ function Landing() {
 function SignedInEntry() {
   const profile = useGetMyProfile();
   if (profile.isLoading) return <div dir="rtl" className="min-h-[100dvh] bg-[#f4f1e6] p-8"><div className="mx-auto max-w-4xl animate-pulse"><div className="h-10 w-48 rounded-full bg-[#dce4d8]"/><div className="mt-8 h-56 rounded-[2rem] bg-[#e8e4d8]"/></div></div>;
+  if (profile.isError) return <div dir="rtl" className="min-h-[100dvh] bg-[#f4f1e6] p-8"><div className="mx-auto max-w-4xl"><ErrorMessage onRetry={() => void profile.refetch()} /></div></div>;
   if (profile.data && !profile.data.profile) return <Redirect to="/onboarding" />;
   return <Redirect to="/discover" />;
 }
@@ -224,7 +225,8 @@ function AuthFrame({children}:{children:ReactNode}) {
 
 function AuthGate({ children }: { children: ReactNode }) {
   const profile = useGetMyProfile();
-  return <><Show when="signed-in">{profile.isLoading?<div dir="rtl" className="min-h-[100dvh] bg-[#f4f1e6] p-8"><div className="mx-auto h-40 max-w-3xl animate-pulse rounded-[2rem] bg-[#e8e4d8]"/></div>:profile.data&&!profile.data.profile?<Redirect to="/onboarding"/>:children}</Show><Show when="signed-out"><Redirect to="/" /></Show></>;
+  const [location] = useLocation();
+  return <><Show when="signed-in">{profile.isLoading?<div dir="rtl" className="min-h-[100dvh] bg-[#f4f1e6] p-8"><div className="mx-auto h-40 max-w-3xl animate-pulse rounded-[2rem] bg-[#e8e4d8]"/></div>:profile.isError?<div dir="rtl" className="min-h-[100dvh] bg-[#f4f1e6] p-8"><div className="mx-auto max-w-4xl"><ErrorMessage onRetry={() => void profile.refetch()} /></div></div>:profile.data&&!profile.data.profile&&location!=='/onboarding'?<Redirect to="/onboarding"/>:children}</Show><Show when="signed-out"><Redirect to="/" /></Show></>;
 }
 function Portal({children,title,eyebrow,action}:{children:ReactNode;title:string;eyebrow:string;action?:ReactNode}) { return <AuthGate><Shell title={title} eyebrow={eyebrow} action={action}>{children}</Shell></AuthGate>; }
 
