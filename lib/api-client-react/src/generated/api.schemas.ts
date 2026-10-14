@@ -35,6 +35,102 @@ export interface MyProfileResponse {
   profile: Profile | null;
 }
 
+export interface SocialPostAuthor {
+  id: number;
+  displayName: string;
+  /** @nullable */
+  avatarUrl: string | null;
+  city: string;
+}
+
+export interface SocialPost {
+  id: number;
+  profileId: number;
+  author: SocialPostAuthor;
+  caption: string;
+  durationSeconds: number;
+  mediaUrl: string;
+  createdAt: string;
+}
+
+export interface SocialPostInput {
+  /** @minLength 1 */
+  objectPath: string;
+  /** @maxLength 2200 */
+  caption: string;
+  /**
+     * @minimum 1
+     * @maximum 90
+     */
+  durationSeconds: number;
+  familySafeConfirmed: true;
+}
+
+export interface DeleteSocialPostResult {
+  success: boolean;
+}
+
+export type UploadUrlRequestContentType = typeof UploadUrlRequestContentType[keyof typeof UploadUrlRequestContentType];
+
+
+export const UploadUrlRequestContentType = {
+  'video/mp4': 'video/mp4',
+  'video/webm': 'video/webm',
+  'video/quicktime': 'video/quicktime',
+} as const;
+
+export interface UploadUrlRequest {
+  /**
+     * @minLength 1
+     * @maxLength 255
+     */
+  name: string;
+  /**
+     * @minimum 1
+     * @maximum 104857600
+     */
+  size: number;
+  contentType: UploadUrlRequestContentType;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata: UploadUrlRequest;
+}
+
+export type TranslationInputTargetLanguage = typeof TranslationInputTargetLanguage[keyof typeof TranslationInputTargetLanguage];
+
+
+export const TranslationInputTargetLanguage = {
+  ar: 'ar',
+  en: 'en',
+  ko: 'ko',
+} as const;
+
+export interface TranslationInput {
+  /**
+     * @minLength 1
+     * @maxLength 2000
+     */
+  text: string;
+  targetLanguage: TranslationInputTargetLanguage;
+}
+
+export type TranslationResultTargetLanguage = typeof TranslationResultTargetLanguage[keyof typeof TranslationResultTargetLanguage];
+
+
+export const TranslationResultTargetLanguage = {
+  ar: 'ar',
+  en: 'en',
+  ko: 'ko',
+} as const;
+
+export interface TranslationResult {
+  translatedText: string;
+  targetLanguage: TranslationResultTargetLanguage;
+}
+
 export interface ProfileInput {
   /**
      * @minLength 2

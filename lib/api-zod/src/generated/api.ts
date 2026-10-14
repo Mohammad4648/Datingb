@@ -128,6 +128,187 @@ export const DiscoverProfilesResponse = zod.array(DiscoverProfilesResponseItem)
 
 
 /**
+ * @summary Get a public member profile
+ */
+export const GetPublicProfileParams = zod.object({
+  "profileId": zod.coerce.number().int()
+})
+
+export const GetPublicProfileResponse = zod.object({
+  "id": zod.number().int(),
+  "displayName": zod.string(),
+  "age": zod.number().int(),
+  "city": zod.string(),
+  "bio": zod.string().nullable(),
+  "avatarUrl": zod.string().nullable(),
+  "languages": zod.array(zod.string()),
+  "interests": zod.array(zod.string()),
+  "isOnline": zod.boolean(),
+  "isPublic": zod.boolean()
+})
+
+
+/**
+ * @summary List the signed-in user's short videos
+ */
+export const ListMySocialPostsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "profileId": zod.number().int(),
+  "author": zod.object({
+  "id": zod.number().int(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "city": zod.string()
+}),
+  "caption": zod.string(),
+  "durationSeconds": zod.number().int(),
+  "mediaUrl": zod.string().url(),
+  "createdAt": zod.coerce.date()
+})
+export const ListMySocialPostsResponse = zod.array(ListMySocialPostsResponseItem)
+
+
+/**
+ * @summary List posts for a public member profile
+ */
+export const ListProfileSocialPostsParams = zod.object({
+  "profileId": zod.coerce.number().int()
+})
+
+export const ListProfileSocialPostsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "profileId": zod.number().int(),
+  "author": zod.object({
+  "id": zod.number().int(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "city": zod.string()
+}),
+  "caption": zod.string(),
+  "durationSeconds": zod.number().int(),
+  "mediaUrl": zod.string().url(),
+  "createdAt": zod.coerce.date()
+})
+export const ListProfileSocialPostsResponse = zod.array(ListProfileSocialPostsResponseItem)
+
+
+/**
+ * @summary List recent short videos from public profiles
+ */
+export const ListSocialPostFeedResponseItem = zod.object({
+  "id": zod.number().int(),
+  "profileId": zod.number().int(),
+  "author": zod.object({
+  "id": zod.number().int(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "city": zod.string()
+}),
+  "caption": zod.string(),
+  "durationSeconds": zod.number().int(),
+  "mediaUrl": zod.string().url(),
+  "createdAt": zod.coerce.date()
+})
+export const ListSocialPostFeedResponse = zod.array(ListSocialPostFeedResponseItem)
+
+
+/**
+ * @summary Publish a family-friendly short video
+ */
+
+export const createSocialPostBodyCaptionMax = 2200;
+
+export const createSocialPostBodyDurationSecondsMax = 90;
+
+
+
+export const CreateSocialPostBody = zod.object({
+  "objectPath": zod.string().min(1),
+  "caption": zod.string().max(createSocialPostBodyCaptionMax),
+  "durationSeconds": zod.number().int().min(1).max(createSocialPostBodyDurationSecondsMax),
+  "familySafeConfirmed": zod.literal(true)
+})
+
+export const CreateSocialPostResponse = zod.object({
+  "id": zod.number().int(),
+  "profileId": zod.number().int(),
+  "author": zod.object({
+  "id": zod.number().int(),
+  "displayName": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "city": zod.string()
+}),
+  "caption": zod.string(),
+  "durationSeconds": zod.number().int(),
+  "mediaUrl": zod.string().url(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete one of the signed-in user's posts
+ */
+export const DeleteSocialPostParams = zod.object({
+  "postId": zod.coerce.number().int()
+})
+
+export const DeleteSocialPostResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Create an authenticated direct-to-storage video upload URL
+ */
+export const requestUploadUrlBodyNameMax = 255;
+
+export const requestUploadUrlBodySizeMax = 104857600;
+
+
+
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string().min(1).max(requestUploadUrlBodyNameMax),
+  "size": zod.number().int().min(1).max(requestUploadUrlBodySizeMax),
+  "contentType": zod.enum(['video/mp4', 'video/webm', 'video/quicktime'])
+})
+
+export const requestUploadUrlResponseMetadataNameMax = 255;
+
+export const requestUploadUrlResponseMetadataSizeMax = 104857600;
+
+
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string().url(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+  "name": zod.string().min(1).max(requestUploadUrlResponseMetadataNameMax),
+  "size": zod.number().int().min(1).max(requestUploadUrlResponseMetadataSizeMax),
+  "contentType": zod.enum(['video/mp4', 'video/webm', 'video/quicktime'])
+})
+})
+
+
+/**
+ * On-demand translation; source text is not stored by this endpoint.
+ * @summary Translate a chat message into the selected interface language
+ */
+export const translateTextBodyTextMax = 2000;
+
+
+
+export const TranslateTextBody = zod.object({
+  "text": zod.string().min(1).max(translateTextBodyTextMax),
+  "targetLanguage": zod.enum(['ar', 'en', 'ko'])
+})
+
+export const TranslateTextResponse = zod.object({
+  "translatedText": zod.string(),
+  "targetLanguage": zod.enum(['ar', 'en', 'ko'])
+})
+
+
+/**
  * @summary Start or resume a private conversation
  */
 export const StartConversationParams = zod.object({

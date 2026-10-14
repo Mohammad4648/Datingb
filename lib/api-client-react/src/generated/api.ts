@@ -22,6 +22,7 @@ import type {
 import type {
   BlockInput,
   Conversation,
+  DeleteSocialPostResult,
   DiscoverProfilesParams,
   HealthStatus,
   ListRoomsParams,
@@ -36,7 +37,13 @@ import type {
   Room,
   RoomInput,
   SafetyActionResult,
-  SocialSummary
+  SocialPost,
+  SocialPostInput,
+  SocialSummary,
+  TranslationInput,
+  TranslationResult,
+  UploadUrlRequest,
+  UploadUrlResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -469,6 +476,653 @@ export function useDiscoverProfiles<TData = Awaited<ReturnType<typeof discoverPr
 
 
 
+
+export const getGetPublicProfileUrl = (profileId: number,) => {
+
+
+
+
+  return `/api/profiles/${profileId}`
+}
+
+/**
+ * @summary Get a public member profile
+ */
+export const getPublicProfile = async (profileId: number, options?: Parameters<typeof customFetch>[1]): Promise<Profile> => {
+
+  return customFetch<Profile>(getGetPublicProfileUrl(profileId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicProfileQueryKey = (profileId: number,) => {
+    return [
+    `/api/profiles/${profileId}`
+    ] as const;
+    }
+
+
+export const getGetPublicProfileQueryOptions = <TData = Awaited<ReturnType<typeof getPublicProfile>>, TError = ErrorType<void>>(profileId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicProfileQueryKey(profileId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicProfile>>> = ({ signal }) => getPublicProfile(profileId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: profileId !== null && profileId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicProfile>>>
+export type GetPublicProfileQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a public member profile
+ */
+
+export function useGetPublicProfile<TData = Awaited<ReturnType<typeof getPublicProfile>>, TError = ErrorType<void>>(
+ profileId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicProfileQueryOptions(profileId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListMySocialPostsUrl = () => {
+
+
+
+
+  return `/api/profiles/me/posts`
+}
+
+/**
+ * @summary List the signed-in user's short videos
+ */
+export const listMySocialPosts = async ( options?: Parameters<typeof customFetch>[1]): Promise<SocialPost[]> => {
+
+  return customFetch<SocialPost[]>(getListMySocialPostsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMySocialPostsQueryKey = () => {
+    return [
+    `/api/profiles/me/posts`
+    ] as const;
+    }
+
+
+export const getListMySocialPostsQueryOptions = <TData = Awaited<ReturnType<typeof listMySocialPosts>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMySocialPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMySocialPostsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMySocialPosts>>> = ({ signal }) => listMySocialPosts({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMySocialPosts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMySocialPostsQueryResult = NonNullable<Awaited<ReturnType<typeof listMySocialPosts>>>
+export type ListMySocialPostsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the signed-in user's short videos
+ */
+
+export function useListMySocialPosts<TData = Awaited<ReturnType<typeof listMySocialPosts>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMySocialPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMySocialPostsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListProfileSocialPostsUrl = (profileId: number,) => {
+
+
+
+
+  return `/api/profiles/${profileId}/posts`
+}
+
+/**
+ * @summary List posts for a public member profile
+ */
+export const listProfileSocialPosts = async (profileId: number, options?: Parameters<typeof customFetch>[1]): Promise<SocialPost[]> => {
+
+  return customFetch<SocialPost[]>(getListProfileSocialPostsUrl(profileId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListProfileSocialPostsQueryKey = (profileId: number,) => {
+    return [
+    `/api/profiles/${profileId}/posts`
+    ] as const;
+    }
+
+
+export const getListProfileSocialPostsQueryOptions = <TData = Awaited<ReturnType<typeof listProfileSocialPosts>>, TError = ErrorType<void>>(profileId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProfileSocialPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListProfileSocialPostsQueryKey(profileId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProfileSocialPosts>>> = ({ signal }) => listProfileSocialPosts(profileId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: profileId !== null && profileId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listProfileSocialPosts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListProfileSocialPostsQueryResult = NonNullable<Awaited<ReturnType<typeof listProfileSocialPosts>>>
+export type ListProfileSocialPostsQueryError = ErrorType<void>
+
+
+/**
+ * @summary List posts for a public member profile
+ */
+
+export function useListProfileSocialPosts<TData = Awaited<ReturnType<typeof listProfileSocialPosts>>, TError = ErrorType<void>>(
+ profileId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listProfileSocialPosts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListProfileSocialPostsQueryOptions(profileId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListSocialPostFeedUrl = () => {
+
+
+
+
+  return `/api/social-posts`
+}
+
+/**
+ * @summary List recent short videos from public profiles
+ */
+export const listSocialPostFeed = async ( options?: Parameters<typeof customFetch>[1]): Promise<SocialPost[]> => {
+
+  return customFetch<SocialPost[]>(getListSocialPostFeedUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSocialPostFeedQueryKey = () => {
+    return [
+    `/api/social-posts`
+    ] as const;
+    }
+
+
+export const getListSocialPostFeedQueryOptions = <TData = Awaited<ReturnType<typeof listSocialPostFeed>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSocialPostFeed>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSocialPostFeedQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSocialPostFeed>>> = ({ signal }) => listSocialPostFeed({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSocialPostFeed>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSocialPostFeedQueryResult = NonNullable<Awaited<ReturnType<typeof listSocialPostFeed>>>
+export type ListSocialPostFeedQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List recent short videos from public profiles
+ */
+
+export function useListSocialPostFeed<TData = Awaited<ReturnType<typeof listSocialPostFeed>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSocialPostFeed>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSocialPostFeedQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateSocialPostUrl = () => {
+
+
+
+
+  return `/api/social-posts`
+}
+
+/**
+ * @summary Publish a family-friendly short video
+ */
+export const createSocialPost = async (socialPostInput: SocialPostInput, options?: Parameters<typeof customFetch>[1]): Promise<SocialPost> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SocialPost>(getCreateSocialPostUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(socialPostInput)
+  }
+);}
+
+
+
+
+
+export const getCreateSocialPostMutationKey = () => ['createSocialPost'] as const;
+
+export const getCreateSocialPostMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSocialPost>>, TError,CreateSocialPostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSocialPost>>, TError,CreateSocialPostMutationVariables, TContext> => {
+
+const mutationKey = getCreateSocialPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSocialPost>>, CreateSocialPostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createSocialPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSocialPostMutationResult = NonNullable<Awaited<ReturnType<typeof createSocialPost>>>
+    export type CreateSocialPostMutationBody = BodyType<SocialPostInput>
+    export type CreateSocialPostMutationError = ErrorType<void>
+    export type CreateSocialPostMutationVariables = {data: BodyType<SocialPostInput>}
+
+    /**
+ * @summary Publish a family-friendly short video
+ */
+export const useCreateSocialPost = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSocialPost>>, TError,CreateSocialPostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createSocialPost>>,
+        TError,
+        CreateSocialPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateSocialPostMutationOptions(options));
+    }
+
+export const getDeleteSocialPostUrl = (postId: number,) => {
+
+
+
+
+  return `/api/social-posts/${postId}`
+}
+
+/**
+ * @summary Delete one of the signed-in user's posts
+ */
+export const deleteSocialPost = async (postId: number, options?: Parameters<typeof customFetch>[1]): Promise<DeleteSocialPostResult> => {
+
+  return customFetch<DeleteSocialPostResult>(getDeleteSocialPostUrl(postId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteSocialPostMutationKey = () => ['deleteSocialPost'] as const;
+
+export const getDeleteSocialPostMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSocialPost>>, TError,DeleteSocialPostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSocialPost>>, TError,DeleteSocialPostMutationVariables, TContext> => {
+
+const mutationKey = getDeleteSocialPostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSocialPost>>, DeleteSocialPostMutationVariables> = (props) => {
+          const {postId} = props ?? {};
+
+          return  deleteSocialPost(postId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSocialPostMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSocialPost>>>
+
+    export type DeleteSocialPostMutationError = ErrorType<void>
+    export type DeleteSocialPostMutationVariables = {postId: number}
+
+    /**
+ * @summary Delete one of the signed-in user's posts
+ */
+export const useDeleteSocialPost = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSocialPost>>, TError,DeleteSocialPostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSocialPost>>,
+        TError,
+        DeleteSocialPostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteSocialPostMutationOptions(options));
+    }
+
+export const getRequestUploadUrlUrl = () => {
+
+
+
+
+  return `/api/storage/uploads/request-url`
+}
+
+/**
+ * @summary Create an authenticated direct-to-storage video upload URL
+ */
+export const requestUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: Parameters<typeof customFetch>[1]): Promise<UploadUrlResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(uploadUrlRequest)
+  }
+);}
+
+
+
+
+
+export const getRequestUploadUrlMutationKey = () => ['requestUploadUrl'] as const;
+
+export const getRequestUploadUrlMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestUploadUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestUploadUrl>>, RequestUploadUrlMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestUploadUrl>>>
+    export type RequestUploadUrlMutationBody = BodyType<UploadUrlRequest>
+    export type RequestUploadUrlMutationError = ErrorType<void>
+    export type RequestUploadUrlMutationVariables = {data: BodyType<UploadUrlRequest>}
+
+    /**
+ * @summary Create an authenticated direct-to-storage video upload URL
+ */
+export const useRequestUploadUrl = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,RequestUploadUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestUploadUrl>>,
+        TError,
+        RequestUploadUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestUploadUrlMutationOptions(options));
+    }
+
+export const getTranslateTextUrl = () => {
+
+
+
+
+  return `/api/translations`
+}
+
+/**
+ * On-demand translation; source text is not stored by this endpoint.
+ * @summary Translate a chat message into the selected interface language
+ */
+export const translateText = async (translationInput: TranslationInput, options?: Parameters<typeof customFetch>[1]): Promise<TranslationResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<TranslationResult>(getTranslateTextUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(translationInput)
+  }
+);}
+
+
+
+
+
+export const getTranslateTextMutationKey = () => ['translateText'] as const;
+
+export const getTranslateTextMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof translateText>>, TError,TranslateTextMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof translateText>>, TError,TranslateTextMutationVariables, TContext> => {
+
+const mutationKey = getTranslateTextMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof translateText>>, TranslateTextMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  translateText(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TranslateTextMutationResult = NonNullable<Awaited<ReturnType<typeof translateText>>>
+    export type TranslateTextMutationBody = BodyType<TranslationInput>
+    export type TranslateTextMutationError = ErrorType<void>
+    export type TranslateTextMutationVariables = {data: BodyType<TranslationInput>}
+
+    /**
+ * @summary Translate a chat message into the selected interface language
+ */
+export const useTranslateText = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof translateText>>, TError,TranslateTextMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof translateText>>,
+        TError,
+        TranslateTextMutationVariables,
+        TContext
+      > => {
+      return useMutation(getTranslateTextMutationOptions(options));
+    }
 
 export const getStartConversationUrl = (profileId: number,) => {
 

@@ -20,6 +20,12 @@ tags:
     description: Opt-in random matching
   - name: safety
     description: User safety and privacy
+  - name: social-posts
+    description: Family-friendly short videos and profile posts
+  - name: translations
+    description: On-demand chat message translations
+  - name: storage
+    description: Authenticated media uploads
 paths:
   /healthz:
     get:
@@ -107,6 +113,164 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Profile"
+  /profiles/{profileId}:
+    get:
+      operationId: getPublicProfile
+      tags: [social]
+      summary: Get a public member profile
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Public member profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "404":
+          description: Public profile not found
+  /profiles/me/posts:
+    get:
+      operationId: listMySocialPosts
+      tags: [social-posts]
+      summary: List the signed-in user's short videos
+      responses:
+        "200":
+          description: The signed-in user's posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SocialPost"
+  /profiles/{profileId}/posts:
+    get:
+      operationId: listProfileSocialPosts
+      tags: [social-posts]
+      summary: List posts for a public member profile
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Public profile posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SocialPost"
+        "404":
+          description: Public profile not found
+  /social-posts:
+    get:
+      operationId: listSocialPostFeed
+      tags: [social-posts]
+      summary: List recent short videos from public profiles
+      responses:
+        "200":
+          description: Recent public video posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SocialPost"
+    post:
+      operationId: createSocialPost
+      tags: [social-posts]
+      summary: Publish a family-friendly short video
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SocialPostInput"
+      responses:
+        "201":
+          description: Published video post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SocialPost"
+        "400":
+          description: Invalid post or uploaded object
+        "401":
+          description: Sign-in required
+  /social-posts/{postId}:
+    delete:
+      operationId: deleteSocialPost
+      tags: [social-posts]
+      summary: Delete one of the signed-in user's posts
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Post deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteSocialPostResult"
+        "404":
+          description: Post not found
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Create an authenticated direct-to-storage video upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL and object path
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Unsupported media or invalid file metadata
+        "401":
+          description: Sign-in required
+  /translations:
+    post:
+      operationId: translateText
+      tags: [translations]
+      summary: Translate a chat message into the selected interface language
+      description: On-demand translation; source text is not stored by this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslationInput"
+      responses:
+        "200":
+          description: Translated message text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslationResult"
+        "401":
+          description: Sign-in required
+        "429":
+          description: Translation rate limit reached
+        "503":
+          description: Translation service is not configured
   /profiles/{profileId}/conversations:
     post:
       operationId: startConversation
@@ -450,6 +614,107 @@ components:
         isPublic:
           type: boolean
       required: [id, displayName, age, city, bio, avatarUrl, languages, interests, isOnline, isPublic]
+    SocialPostAuthor:
+      type: object
+      properties:
+        id:
+          type: integer
+        displayName:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        city:
+          type: string
+      required: [id, displayName, avatarUrl, city]
+    SocialPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        profileId:
+          type: integer
+        author:
+          $ref: "#/components/schemas/SocialPostAuthor"
+        caption:
+          type: string
+        durationSeconds:
+          type: integer
+        mediaUrl:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, profileId, author, caption, durationSeconds, mediaUrl, createdAt]
+    SocialPostInput:
+      type: object
+      properties:
+        objectPath:
+          type: string
+          minLength: 1
+        caption:
+          type: string
+          maxLength: 2200
+        durationSeconds:
+          type: integer
+          minimum: 1
+          maximum: 90
+        familySafeConfirmed:
+          type: boolean
+          enum: [true]
+      required: [objectPath, caption, durationSeconds, familySafeConfirmed]
+    DeleteSocialPostResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+    UploadUrlRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size:
+          type: integer
+          minimum: 1
+          maximum: 104857600
+        contentType:
+          type: string
+          enum: [video/mp4, video/webm, video/quicktime]
+      required: [name, size, contentType]
+    UploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/UploadUrlRequest"
+      required: [uploadURL, objectPath, metadata]
+    TranslationInput:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        targetLanguage:
+          type: string
+          enum: [ar, en, ko]
+      required: [text, targetLanguage]
+    TranslationResult:
+      type: object
+      properties:
+        translatedText:
+          type: string
+        targetLanguage:
+          type: string
+          enum: [ar, en, ko]
+      required: [translatedText, targetLanguage]
     ProfileInput:
       type: object
       properties:

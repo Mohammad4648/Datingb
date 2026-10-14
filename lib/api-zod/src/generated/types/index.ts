@@ -8,6 +8,7 @@
 
 export * from './blockInput';
 export * from './conversation';
+export * from './deleteSocialPostResult';
 export * from './discoverProfilesParams';
 export * from './healthStatus';
 export * from './listRoomsParams';
@@ -23,4 +24,14 @@ export * from './reportInputReason';
 export * from './room';
 export * from './roomInput';
 export * from './safetyActionResult';
+export * from './socialPost';
+export * from './socialPostAuthor';
+export * from './socialPostInput';
 export * from './socialSummary';
+export * from './translationInput';
+export * from './translationInputTargetLanguage';
+export * from './translationResult';
+export * from './translationResultTargetLanguage';
+export * from './uploadUrlRequest';
+export * from './uploadUrlRequestContentType';
+export * from './uploadUrlResponse';
