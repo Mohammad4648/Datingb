@@ -5,6 +5,7 @@ import profilesRouter from "./profiles";
 import roomsRouter from "./rooms";
 import socialPostsRouter from "./socialPosts";
 import storageRouter from "./storage";
+import subscriptionsRouter from "./subscriptions";
 import translationsRouter from "./translations";
 
 const router: IRouter = Router();
@@ -15,6 +16,7 @@ router.use(conversationsRouter);
 router.use(roomsRouter);
 router.use(socialPostsRouter);
 router.use(storageRouter);
+router.use(subscriptionsRouter);
 router.use(translationsRouter);
 
 export default router;
