@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Crown, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, Crown, ShieldCheck, Sparkles, ArrowLeft } from "lucide-react";
 
 type SubscriptionPlan = {
   id: number;
@@ -12,6 +12,50 @@ type SubscriptionPlan = {
   trialDays: number;
   features: string[];
 };
+
+const fallbackPlans: SubscriptionPlan[] = [
+  {
+    id: 1,
+    slug: "starter",
+    name: "Starter",
+    description: "A simple way to unlock more visibility and connect faster.",
+    price: 49,
+    currency: "USD",
+    interval: "monthly",
+    trialDays: 7,
+    features: ["Basic profile boost", "Priority inbox placement", "One free weekly match boost"],
+  },
+  {
+    id: 2,
+    slug: "pro",
+    name: "Pro",
+    description: "Best for members who want deeper visibility and premium matching power.",
+    price: 99,
+    currency: "USD",
+    interval: "monthly",
+    trialDays: 14,
+    features: ["Everything in Starter", "Advanced match recommendations", "Profile spotlight placement", "Priority support"],
+  },
+  {
+    id: 3,
+    slug: "vip",
+    name: "VIP",
+    description: "For members who want the most premium and exclusive access.",
+    price: 199,
+    currency: "USD",
+    interval: "monthly",
+    trialDays: 21,
+    features: ["Everything in Pro", "VIP community access", "Dedicated concierge support", "Exclusive events invitations"],
+  },
+];
+
+function formatPrice(price: number, currency: string) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(price);
+}
 
 export default function BillingPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -37,9 +81,12 @@ export default function BillingPage() {
       }
 
       const data = (await res.json()) as SubscriptionPlan[];
-      setPlans(data);
+      setPlans(Array.isArray(data) && data.length > 0 ? data : fallbackPlans);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unexpected error");
+      setPlans(fallbackPlans);
+      setError(
+        err instanceof Error ? err.message : "Could not load plans, showing the latest available packages."
+      );
     } finally {
       setLoading(false);
     }
@@ -90,7 +137,7 @@ export default function BillingPage() {
           </h1>
 
           <p className="mt-3 text-base text-[#526a65]">
-            Unlock priority matching, advanced profile visibility, and exclusive community tools.
+            Unlock priority matching, deeper profile visibility, and premium community tools.
           </p>
         </div>
 
@@ -103,11 +150,13 @@ export default function BillingPage() {
         {loading ? (
           <div className="grid gap-6 md:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-80 animate-pulse rounded-[24px] border border-[#e4dfd0] bg-white/60"
-              />
+              <div key={index} className="h-80 animate-pulse rounded-[24px] border border-[#e4dfd0] bg-white/60" />
             ))}
+          </div>
+        ) : plans.length === 0 ? (
+          <div className="rounded-[28px] border border-dashed border-[#d6cdb9] bg-[#faf7ee] p-10 text-center">
+            <p className="text-lg font-black text-[#1a4b46]">No plans are available right now.</p>
+            <p className="mt-2 text-sm text-[#5d726d]">Please check again shortly.</p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-3">
@@ -119,7 +168,7 @@ export default function BillingPage() {
                 <div
                   key={plan.id}
                   className={[
-                    "rounded-[28px] border p-6 shadow-sm",
+                    "rounded-[28px] border p-6 shadow-sm transition-transform duration-200 hover:-translate-y-1",
                     isPopular
                       ? "border-[#205c50] bg-[#1e514a] text-white shadow-lg"
                       : "border-[#ddd5c4] bg-[#fffdf8] text-[#183c37]",
@@ -147,38 +196,20 @@ export default function BillingPage() {
                   </div>
 
                   <div className="mb-5 flex items-end gap-2">
-                    <span className="text-4xl font-black">{plan.price}</span>
-                    <span
-                      className={
-                        isPopular ? "text-sm text-[#f3ebdd]" : "text-sm text-[#617269]"
-                      }
-                    >
-                      {plan.currency}
+                    <span className="text-4xl font-black">{formatPrice(plan.price, plan.currency)}</span>
+                    <span className={isPopular ? "text-sm text-[#f3ebdd]" : "text-sm text-[#617269]"}>
+                      / {plan.interval}
                     </span>
                   </div>
 
-                  <p
-                    className={
-                      isPopular ? "mb-5 text-sm text-[#dfebdf]" : "mb-5 text-sm text-[#5e726d]"
-                    }
-                  >
+                  <p className={isPopular ? "mb-5 text-sm text-[#dfebdf]" : "mb-5 text-sm text-[#5e726d]"}>
                     {plan.description}
                   </p>
 
-                  <div
-                    className={
-                      isPopular
-                        ? "mb-6 space-y-3 text-sm text-[#edf4ef]"
-                        : "mb-6 space-y-3 text-sm text-[#335552]"
-                    }
-                  >
+                  <div className={isPopular ? "mb-6 space-y-3 text-sm text-[#edf4ef]" : "mb-6 space-y-3 text-sm text-[#335552]"}>
                     {plan.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
-                        <div
-                          className={
-                            isPopular ? "mt-0.5 text-[#f0d7a0]" : "mt-0.5 text-[#205c50]"
-                          }
-                        >
+                        <div className={isPopular ? "mt-0.5 text-[#f0d7a0]" : "mt-0.5 text-[#205c50]"}>
                           <Check size={16} />
                         </div>
                         <span>{feature}</span>
@@ -187,11 +218,7 @@ export default function BillingPage() {
                   </div>
 
                   {plan.trialDays > 0 && (
-                    <div
-                      className={
-                        isPopular ? "mb-5 text-xs text-[#f7e9cd]" : "mb-5 text-xs text-[#59756d]"
-                      }
-                    >
+                    <div className={isPopular ? "mb-5 text-xs text-[#f7e9cd]" : "mb-5 text-xs text-[#59756d]"}>
                       {plan.trialDays} day free trial
                     </div>
                   )}
@@ -221,6 +248,7 @@ export default function BillingPage() {
             <ShieldCheck size={16} className="text-[#1c584d]" />
             Safe and flexible billing
           </div>
+
           <div className="flex flex-wrap items-center gap-4">
             <span className="inline-flex items-center gap-2">
               <Sparkles size={14} className="text-[#d89f68]" /> Secure payment checkout
@@ -231,6 +259,13 @@ export default function BillingPage() {
             <span className="inline-flex items-center gap-2">
               <Crown size={14} className="text-[#c89c3d]" /> Manual renewal per cycle
             </span>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-[#e3d9c8] bg-white/40 px-4 py-3 text-xs text-[#536d69]">
+            <span>Need help choosing a plan?</span>
+            <a href="/settings" className="inline-flex items-center gap-2 font-bold text-[#205c50]">
+              Back to settings <ArrowLeft size={14} />
+            </a>
           </div>
         </div>
       </div>
